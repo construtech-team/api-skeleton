@@ -1,0 +1,51 @@
+version: '3.6'
+
+volumes:
+  storage: {}
+
+services:
+  backend:
+    build:
+      context: ./backend/api
+      target: ${DOCKER_TARGET}
+      args:
+        - APPLICATION_ENV=${APPLICATION_ENV}
+    container_name: construlab-backend
+    # command: sh -c "npm install && npm run dev:debug"
+    env_file:
+      - .env
+    environment:
+      APPLICATION_ENV: ${APPLICATION_ENV}
+      DB_CONNECTION: "mongodb://${DB_USER}:${DB_USER_PWD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+    ports:
+      - 3000:3000
+      - 9229:9229
+    volumes:
+      - ./backend/api:/srv/backend
+    links:
+      - database
+    depends_on:
+      - database
+
+  database:
+    build:
+      context: docker/mongodb
+    container_name: construlab-db
+    env_file:
+      - .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_ROOT}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_ROOT_PWD}
+      - MONGO_INITDB_DATABASE=${DB_NAME}
+      - MONGODB_ADMIN_USER=${DB_ROOT}
+      - MONGODB_ADMIN_PASS=${DB_ROOT_PWD}
+      - MONGODB_APPLICATION_DATABASE=${DB_NAME}
+      - MONGODB_APPLICATION_USER=${DB_USER}
+      - MONGODB_APPLICATION_PASS=${DB_USER_PWD}
+    volumes:
+      - storage:/data/db
+    ports:
+      - 27017:27017
+    restart: always
+
+

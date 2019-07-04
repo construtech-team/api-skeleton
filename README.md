@@ -1,3 +1,3 @@
-# Basic API Skeleton
-> A simplistic example  of how we organizes our APIs.
+Copiar o `end.dist` para `.env`
 
+Rodar `docker-compose up --build`
